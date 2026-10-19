@@ -1,0 +1,45 @@
+# Python and local tooling
+.venv/
+venv/
+**/__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+.idea/
+.vscode/
+
+# Credentials and local configuration (the template is public)
+.env
+.env.*
+!.env.example
+*.key
+*.pem
+*.p12
+*.pfx
+*credentials*.json
+
+# Local state, logs, and private documents
+*.db
+*.db-shm
+*.db-wal
+*.db-journal
+*.sqlite
+*.sqlite3
+*.sqlite-shm
+*.sqlite-wal
+*.sqlite-journal
+*.sqlite3-shm
+*.sqlite3-wal
+*.sqlite3-journal
+*.log
+*.log.*
+*.tmp
+logs/
+data/
+storage/
+uploads/
+private/
+worker-output/
+tmp/
+*.pdf
+!demo/assets/asteredge_x100_guide.pdf
