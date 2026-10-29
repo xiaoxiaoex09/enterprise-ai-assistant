@@ -136,7 +136,7 @@ class BackendTests(unittest.TestCase):
                 if hasattr(included, "path") and hasattr(included, "methods")
             )
         self.assertEqual(len(routes), len(set(routes)))
-        self.assertEqual(sum(len(methods) for methods in main.app.openapi()["paths"].values()), 19)
+        self.assertEqual(sum(len(methods) for methods in main.app.openapi()["paths"].values()), 26)
         self.assertEqual(set(main.app.openapi()["paths"]["/health"]), {"get"})
         self.assertEqual(
             set(main.app.openapi()["paths"]["/v1/documents/{document_id}/publish"]),
@@ -170,6 +170,8 @@ class BackendTests(unittest.TestCase):
             {
                 "/health", "/v1/documents", "/v1/documents/{document_id}",
                 "/v1/documents/{document_id}/publish",
+                "/v1/auth/bootstrap", "/v1/auth/login", "/v1/auth/logout",
+                "/v1/auth/me", "/v1/auth/users",
             },
         )
         self.assertEqual(len(isolated_app.user_middleware), 1)
@@ -196,8 +198,12 @@ class BackendTests(unittest.TestCase):
             allowed = asyncio.run(close_legacy_routes_in_pilot_mode(
                 request_for("/health"), allow_request,
             ))
+            homepage = asyncio.run(close_legacy_routes_in_pilot_mode(
+                request_for("/"), allow_request,
+            ))
             self.assertEqual(blocked.status_code, 404)
             self.assertEqual(allowed.status_code, 200)
+            self.assertEqual(homepage.headers["location"], "/login")
 
     def test_migrated_document_detail_keeps_auth_and_tenant_isolation(self):
         database.init_db()

@@ -20,12 +20,15 @@ DEMO_PDF = Path(__file__).resolve().parent / "demo" / "assets" / "asteredge_x100
 
 def request(method: str, path: str, *, key: str | None = None,
             payload: dict | None = None, body: bytes | None = None,
-            query: dict | None = None, content_type: str | None = None) -> tuple[int, dict]:
+            query: dict | None = None, content_type: str | None = None,
+            authorization: str | None = None) -> tuple[int, dict | None]:
     """Call the actual ASGI app without an external server or HTTP dependency."""
     body = json.dumps(payload).encode() if payload is not None else (body or b"")
     headers = []
     if key is not None:
         headers.append((b"x-api-key", key.encode()))
+    if authorization is not None:
+        headers.append((b"authorization", authorization.encode()))
     if payload is not None:
         headers.append((b"content-type", b"application/json"))
     elif content_type is not None:
@@ -59,7 +62,7 @@ def request(method: str, path: str, *, key: str | None = None,
     status = next(item["status"] for item in messages if item["type"] == "http.response.start")
     response_body = b"".join(item.get("body", b"") for item in messages
                              if item["type"] == "http.response.body")
-    return status, json.loads(response_body)
+    return status, json.loads(response_body) if response_body else None
 
 
 class DemoFlowTests(unittest.TestCase):
@@ -115,6 +118,12 @@ class DemoFlowTests(unittest.TestCase):
         )
         self.assertEqual((status, upload["status"]), (202, "queued"))
         document_id, job_id = upload["document_id"], upload["job_id"]
+        status, own_documents = request("GET", "/v1/documents", key=self.engineer_a)
+        self.assertEqual(status, 200)
+        self.assertEqual([item["id"] for item in own_documents], [document_id])
+        self.assertEqual(own_documents[0]["device_model_ids"], [model_a["id"]])
+        self.assertEqual(request("GET", "/v1/documents", key=self.admin_b), (200, []))
+        self.assertEqual(request("GET", "/v1/documents")[0], 401)
         self.assertEqual(request("GET", f"/v1/ingestion-jobs/{job_id}", key=self.admin_a)[1]["status"], "queued")
         self.assertEqual(request("GET", f"/v1/documents/{document_id}", key=self.admin_b)[0], 404)
         self.assertEqual(request("GET", f"/v1/ingestion-jobs/{job_id}", key=self.admin_b)[0], 404)

@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#f6f8fc">
+  <title>知序 · 企业知识助手</title>
+  <link rel="stylesheet" href="/assets/style.css">
+  <link rel="stylesheet" href="/assets/account.css">
+  <script src="/assets/app.js" defer></script>
+</head>
+<body>
+  <div class="shell">
+    <aside class="sidebar">
+      <div class="brand"><span class="brand-mark">知</span><span><strong>知序</strong><small>企业知识助手</small></span></div>
+      <div class="side-label">工作空间</div>
+      <nav aria-label="主导航">
+        <a href="#overview" class="nav-link active"><span>◫</span> 工作概览</a>
+        <a href="#ask" class="nav-link"><span>✧</span> 智能问答</a>
+        <a href="#documents" class="nav-link"><span>▤</span> 知识文档</a>
+        <a href="#settings" class="nav-link"><span>⚙</span> 账号管理</a>
+      </nav>
+      <div class="side-bottom"><span class="status-dot"></span> v1.0.1 · 试点版</div>
+    </aside>
+
+    <main>
+      <header class="topbar"><div><span class="eyebrow">WORKSPACE / 控制台</span><h1>企业知识工作台</h1></div><div class="top-actions"><span id="connectionBadge" class="badge muted">未连接</span><a class="help-link" href="/docs" target="_blank" rel="noopener">API 文档 ↗</a></div></header>
+      <div id="notice" class="notice" role="status" aria-live="polite" hidden></div>
+
+      <section id="overview" class="hero">
+        <div><span class="pill">让经验随时可查</span><h2>设备知识，<br><em>一问即达。</em></h2><p>集中管理设备手册，审核后发布知识。每条回答都附有文档、页码与原文依据。</p><a class="primary-link" href="#ask">开始提问 <span>↗</span></a></div>
+        <div class="hero-art" aria-hidden="true"><div class="art-orbit orbit-one"></div><div class="art-orbit orbit-two"></div><div class="art-card"><span>✦</span><div class="art-lines"><i></i><i></i><i></i></div></div><div class="art-chip chip-one">资料已引用 ✓</div><div class="art-chip chip-two">精准检索</div></div>
+      </section>
+
+      <section class="stats" aria-label="工作状态"><div class="stat"><span>当前企业</span><strong id="orgName">尚未连接</strong><small>专属知识空间</small></div><div class="stat"><span>设备型号</span><strong id="modelCount">—</strong><small>已接入型号</small></div><div class="stat"><span>知识文档</span><strong id="docCount">—</strong><small>最近 100 份</small></div><div class="stat"><span>待审核</span><strong id="reviewCount">—</strong><small>发布后方可用于问答</small></div></section>
+
+      <div class="content-grid">
+        <section id="ask" class="panel ask-panel"><div class="section-head"><div><span class="eyebrow">ASK THE KNOWLEDGE</span><h2>智能问答</h2></div><span class="section-icon">✧</span></div><p class="section-intro">选择设备型号，描述遇到的问题；回答会展示可核对的来源。</p><form id="askForm"><label for="askModel">设备型号</label><select id="askModel" required><option value="">请先连接并选择型号</option></select><label for="faultCode">故障代码 <span class="optional">选填</span></label><input id="faultCode" maxlength="64" placeholder="例如 E-17"><label for="question">你的问题</label><textarea id="question" maxlength="2000" required placeholder="例如：设备出现 E-17 故障时，应该先检查什么？"></textarea><button class="button primary" type="submit">获取有依据的回答 <span>→</span></button></form><div id="answerBox" class="answer-box" hidden><div class="answer-heading"><span id="answerStatus" class="badge"></span><span>AI 回答 · 请结合原始资料复核</span></div><p id="answerText"></p><div id="references"></div></div></section>
+
+        <section id="settings" class="panel settings-panel"><div class="section-head"><div><span class="eyebrow">ACCOUNT & ACCESS</span><h2>账号管理</h2></div><span class="section-icon">⚙</span></div><p class="section-intro">当前账号属于 <strong id="currentOrg">—</strong>。每个账号只能访问所属企业的资料。</p><div class="account-line"><span>当前用户</span><strong id="currentUser">—</strong></div><div class="account-line"><span>权限</span><strong id="currentRole">—</strong></div><div id="userManager" hidden><h3>创建成员账号</h3><p class="section-intro">管理员可为本企业添加工程师或其他管理员。</p><form id="userForm"><label for="newUsername">用户名</label><input id="newUsername" minlength="3" maxlength="50" required autocomplete="off" placeholder="至少 3 个字符"><label for="newPassword">初始密码</label><input id="newPassword" type="password" minlength="12" maxlength="128" required autocomplete="new-password" placeholder="至少 12 位"><label for="newRole">账号角色</label><select id="newRole"><option value="engineer">工程师</option><option value="admin">管理员</option></select><button class="button secondary" type="submit">创建成员账号</button></form><div id="userList" class="member-list"></div></div><button id="disconnect" class="disconnect" type="button">退出登录</button></section>
+      </div>
+
+      <section id="documents" class="panel documents-panel"><div class="section-head"><div><span class="eyebrow">KNOWLEDGE LIBRARY</span><h2>知识文档</h2></div><span class="section-icon">▤</span></div><div class="library-grid"><div><h3>已上传文档</h3><p class="section-intro">文档完成入库后进入待审核；管理员发布后才能用于问答。</p><div id="documentList" class="document-list"><p class="empty">登录后查看本企业文档。</p></div><button id="refreshDocs" class="text-button refresh" type="button">↻ 刷新列表</button></div><div class="library-actions" id="adminActions"><div class="action-card"><h3>上传 PDF</h3><form id="uploadForm"><label for="uploadTitle">文档名称</label><input id="uploadTitle" required maxlength="200" placeholder="例如 X100 维修手册"><div class="two-cols"><div><label for="familyKey">文档系列</label><input id="familyKey" required maxlength="100" placeholder="x100-manual"></div><div><label for="version">版本</label><input id="version" required maxlength="50" placeholder="1.0"></div></div><label for="uploadModels">适用型号</label><select id="uploadModels" multiple required size="3"></select><small class="field-help">按 Ctrl 可多选；仅支持 PDF，最大 50 MB。</small><label for="pdfFile">PDF 文件</label><input id="pdfFile" type="file" accept="application/pdf,.pdf" required><button class="button primary" type="submit">上传并开始入库 →</button></form><p id="jobStatus" class="job-status" aria-live="polite"></p></div><div class="action-card"><h3>新增设备型号</h3><form id="modelForm"><label for="modelCode">型号编码</label><input id="modelCode" required maxlength="64" placeholder="例如 X100"><label for="modelName">型号名称</label><input id="modelName" required maxlength="100" placeholder="例如 智能传感器 X100"><button class="button secondary" type="submit">添加型号</button></form></div></div></div></section>
+      <footer>知序 · 企业知识助手 <span>回答仅供参考，关键操作请核对原始文档。</span></footer>
+    </main>
+  </div>
+</body>
+</html>

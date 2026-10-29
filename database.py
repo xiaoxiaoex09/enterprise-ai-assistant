@@ -80,6 +80,34 @@ def _init_product_schema(conn: sqlite3.Connection) -> None:
         )
     """)
     conn.execute("""
+        CREATE TABLE IF NOT EXISTS pilot_users (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            organization_id INTEGER NOT NULL REFERENCES organizations(id),
+            username TEXT NOT NULL COLLATE NOCASE,
+            role TEXT NOT NULL CHECK (role IN ('admin', 'engineer')),
+            password_hash TEXT NOT NULL,
+            created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+            UNIQUE (organization_id, username)
+        )
+    """)
+    conn.execute("""
+        CREATE TABLE IF NOT EXISTS pilot_sessions (
+            token_hash TEXT PRIMARY KEY,
+            user_id INTEGER NOT NULL REFERENCES pilot_users(id) ON DELETE CASCADE,
+            expires_at INTEGER NOT NULL
+        )
+    """)
+    conn.execute("CREATE INDEX IF NOT EXISTS pilot_sessions_expiry ON pilot_sessions(expires_at)")
+    conn.execute("""
+        CREATE TABLE IF NOT EXISTS pilot_login_failures (
+            organization_name TEXT NOT NULL,
+            username TEXT NOT NULL,
+            attempts INTEGER NOT NULL DEFAULT 0,
+            locked_until INTEGER NOT NULL DEFAULT 0,
+            PRIMARY KEY (organization_name, username)
+        )
+    """)
+    conn.execute("""
         CREATE TABLE IF NOT EXISTS device_models (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             organization_id INTEGER NOT NULL REFERENCES organizations(id),
