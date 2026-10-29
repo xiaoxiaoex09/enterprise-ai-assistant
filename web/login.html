@@ -1,0 +1,24 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#f5f7fb">
+  <title>登录 · 知序企业知识助手</title>
+  <link rel="stylesheet" href="/assets/style.css">
+  <link rel="stylesheet" href="/assets/login.css">
+  <style>main.login-layout{width:100%;max-width:none;padding:0;margin:0}</style>
+  <script src="/assets/login.js" defer></script>
+</head>
+<body>
+  <main class="login-layout">
+    <section class="login-story">
+      <div class="brand light"><span class="brand-mark">知</span><span><strong>知序</strong><small>企业知识助手</small></span></div>
+      <div class="story-content"><span class="story-kicker">ENTERPRISE KNOWLEDGE</span><h1>让每一份知识<br>都能<span>找到答案。</span></h1><p>为你的企业建立专属知识空间。设备手册、审核流程与带来源的智能问答，汇集在同一个工作台。</p><div class="story-proof"><span>✦</span><div><strong>企业资料独立隔离</strong><small>登录后仅可访问所属企业的文档</small></div></div></div>
+      <div class="story-footer">知序 · v1.0.1</div>
+      <div class="story-circle circle-one"></div><div class="story-circle circle-two"></div>
+    </section>
+    <section class="login-side"><div class="login-card"><div class="mobile-brand">知序 · 企业知识助手</div><span class="eyebrow">WELCOME BACK</span><h2>登录工作空间</h2><p class="login-intro">输入企业名称和你的账号密码，继续管理专属知识。</p><div id="loginError" class="login-error" role="alert" hidden></div><form id="loginForm"><label for="organization">企业名称</label><input id="organization" required minlength="2" maxlength="100" autocomplete="organization" placeholder="请输入企业名称"><label for="username">用户名</label><input id="username" required minlength="3" maxlength="50" autocomplete="username" placeholder="请输入用户名"><label for="password">密码</label><input id="password" required minlength="12" maxlength="128" type="password" autocomplete="current-password" placeholder="请输入密码"><button class="button primary login-submit" type="submit">登录工作台 <span>→</span></button></form><div class="setup-line"><span>企业尚未开通？</span><button id="showSetup" type="button">使用管理员密钥首次开通</button></div><div id="setupPanel" class="setup-panel" hidden><h3>首次开通企业</h3><p>管理员密钥仅用于创建首个账号，不会保存到浏览器。</p><form id="setupForm"><label for="setupKey">管理员 API Key</label><input id="setupKey" type="password" minlength="32" required autocomplete="off" placeholder="粘贴管理员密钥"><label for="setupOrg">企业名称</label><input id="setupOrg" minlength="2" maxlength="100" required placeholder="例如：星远科技"><label for="setupUser">管理员用户名</label><input id="setupUser" minlength="3" maxlength="50" required autocomplete="username" placeholder="至少 3 个字符"><label for="setupPassword">管理员密码</label><input id="setupPassword" type="password" minlength="12" maxlength="128" required autocomplete="new-password" placeholder="至少 12 位"><button class="button secondary" type="submit">创建企业并登录</button></form></div><div class="login-foot">遇到问题？请联系你的企业管理员获取账号。</div></div></section>
+  </main>
+</body>
+</html>

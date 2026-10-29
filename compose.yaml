@@ -1,0 +1,38 @@
+services:
+  api:
+    build: .
+    restart: unless-stopped
+    env_file: .env
+    environment:
+      DATABASE_PATH: /srv/data/pilot.db
+      DOCUMENT_STORAGE_PATH: /srv/storage
+      PDF_INGESTION_MODE: worker
+    ports:
+      - "127.0.0.1:8000:8000"
+    volumes:
+      - pilot-data:/srv/data
+      - pilot-storage:/srv/storage
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/health', timeout=3)"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 25s
+  worker:
+    build: .
+    restart: unless-stopped
+    env_file: .env
+    environment:
+      DATABASE_PATH: /srv/data/pilot.db
+      DOCUMENT_STORAGE_PATH: /srv/storage
+      PDF_INGESTION_MODE: worker
+    command: ["python", "pdf_rag_service.py", "work", "--poll-seconds", "3"]
+    volumes:
+      - pilot-data:/srv/data
+      - pilot-storage:/srv/storage
+    depends_on:
+      api:
+        condition: service_healthy
+volumes:
+  pilot-data:
+  pilot-storage:

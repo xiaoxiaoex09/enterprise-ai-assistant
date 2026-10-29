@@ -1,0 +1,27 @@
+services:
+  - type: web
+    name: enterprise-ai-assistant
+    runtime: python
+    plan: 1c-2g
+    region: singapore
+    autoDeployTrigger: checksPass
+    buildCommand: pip install -r requirements.txt
+    startCommand: python deploy/run_render.py
+    healthCheckPath: /health
+    disk:
+      name: pilot-data
+      mountPath: /var/data
+      sizeGB: 1
+    envVars:
+      - key: DATABASE_PATH
+        value: /var/data/pilot.db
+      - key: DOCUMENT_STORAGE_PATH
+        value: /var/data/storage
+      - key: PDF_INGESTION_MODE
+        value: worker
+      - key: PILOT_API_KEYS
+        sync: false
+      - key: SILICONFLOW_API_KEY
+        sync: false
+      - key: DEEPSEEK_API_KEY
+        sync: false

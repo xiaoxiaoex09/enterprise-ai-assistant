@@ -3,11 +3,14 @@
 import json
 import os
 import secrets
+import hashlib
+import time
 from typing import Annotated, Literal
 
-from fastapi import Depends, HTTPException
+from fastapi import Depends, HTTPException, Header
 from fastapi.security import APIKeyHeader
 from pydantic import BaseModel, Field, ValidationError
+from database import get_connection
 
 
 pilot_api_key_header = APIKeyHeader(name="X-API-Key", auto_error=False)
@@ -16,12 +19,31 @@ pilot_api_key_header = APIKeyHeader(name="X-API-Key", auto_error=False)
 class PilotIdentity(BaseModel):
     organization_id: int = Field(gt=0)
     role: Literal["engineer", "admin"]
+    user_id: int | None = None
 
 
 def get_pilot_identity(
     api_key: Annotated[str | None, Depends(pilot_api_key_header)],
+    authorization: Annotated[str | None, Header()] = None,
 ) -> PilotIdentity:
-    """Resolve a pilot API key to its server-controlled organization."""
+    """Resolve a bearer session or bootstrap API key to server-owned identity."""
+    if authorization is not None:
+        scheme, _, token = authorization.partition(" ")
+        if scheme.lower() != "bearer" or not token or len(token) > 256:
+            raise HTTPException(status_code=401, detail="登录状态无效")
+        token_hash = hashlib.sha256(token.encode()).hexdigest()
+        with get_connection() as conn:
+            row = conn.execute(
+                """
+                SELECT u.id, u.organization_id, u.role
+                FROM pilot_sessions s JOIN pilot_users u ON u.id = s.user_id
+                WHERE s.token_hash = ? AND s.expires_at > ?
+                """,
+                (token_hash, int(time.time())),
+            ).fetchone()
+        if row is None:
+            raise HTTPException(status_code=401, detail="登录已过期，请重新登录")
+        return PilotIdentity(organization_id=row["organization_id"], role=row["role"], user_id=row["id"])
     raw_keys = os.getenv("PILOT_API_KEYS")
     if not raw_keys:
         raise HTTPException(status_code=503, detail="试点访问凭据尚未配置")

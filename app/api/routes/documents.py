@@ -9,6 +9,7 @@ from fastapi.concurrency import run_in_threadpool
 
 from app.api.schemas.document import PilotDocumentQueueResponse, PilotDocumentResponse
 from app.core.auth import PilotIdentity, get_pilot_admin, get_pilot_identity
+from database import get_connection
 from app.services.document_service import (
     DocumentNotFoundError,
     DocumentPublishConflictError,
@@ -21,6 +22,36 @@ from app.services.ingestion_runner import run_background_ingestion
 
 logger = logging.getLogger(__name__)
 router = APIRouter()
+
+
+@router.get("/v1/documents", response_model=list[PilotDocumentResponse], tags=["pilot"])
+def list_pilot_documents(
+    identity: Annotated[PilotIdentity, Depends(get_pilot_identity)],
+) -> list[dict[str, Any]]:
+    """List this organization's recent documents without exposing storage paths."""
+    with get_connection() as conn:
+        rows = conn.execute(
+            """
+            SELECT d.id, d.family_key, d.title, d.version, d.status,
+                   d.document_type,
+                   (SELECT COUNT(*) FROM document_chunks c WHERE c.document_id = d.id) AS chunks
+            FROM documents d
+            WHERE d.organization_id = ?
+            ORDER BY d.id DESC LIMIT 100
+            """,
+            (identity.organization_id,),
+        ).fetchall()
+        result = []
+        for row in rows:
+            item = dict(row)
+            item["device_model_ids"] = [
+                model["device_model_id"] for model in conn.execute(
+                    "SELECT device_model_id FROM document_models WHERE document_id = ? ORDER BY device_model_id",
+                    (item["id"],),
+                )
+            ]
+            result.append(item)
+    return result
 
 
 @router.post(
